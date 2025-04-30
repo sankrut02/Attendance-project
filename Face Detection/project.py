@@ -91,19 +91,19 @@ def update_student_attendance(name):
             updated = True
             break
 
-    if not updated:  #Handles the case where the student is not in the students.csv
+    if not updated:  
         with open(filename, 'a') as f:
-            f.write(f'{name},Present,\n') # Added a comma after {name}
+            f.write(f'{name},Present,\n') 
 
     else:
         with open(filename, 'w') as f:
             f.writelines(lines)
 
 
-
-def within_cutoff():
+cutofftime=time(23,24)
+def within_cutoff(cutofftime):
     current_time = datetime.now().time()
-    if current_time <= time(17, 28):
+    if current_time <= cutofftime:
         state = 0
     else:
         state = 1
@@ -155,7 +155,7 @@ while True:
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
             cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-            state = within_cutoff()
+            state = within_cutoff(cutofftime)
 
             if state == 0:
 
@@ -181,7 +181,7 @@ while True:
                 blink_detected = AttendanceCheck(name)
 
     cur_time = datetime.now().time()
-    cutofftime = time(17,28)
+    
     if cutofftime < cur_time:
         break
     cv2.imshow('webcam', img)
@@ -200,9 +200,9 @@ def update_absent_status():
     for line in lines:
         entry = line.strip().split(',')
         if len(entry) > 1 and entry[1] == 'Present':
-            updated_lines.append(line)  # Keep the "Present" status
+            updated_lines.append(line)  
         elif len(entry) > 1:
-            entry[1] = 'Absent'  # Change status to "Absent"
+            entry[1] = 'Absent'  
             updated_lines.append(','.join(entry) + '\n')
         else:
             updated_lines.append(line)
@@ -219,19 +219,18 @@ def get_absent_emails():
         lines = f.readlines()
     for line in lines:
         entry = line.strip().split(',')
-        if len(entry) > 1 and entry[1] == 'Absent' and len(entry) > 2:  # Ensure there's an email
+        if len(entry) > 1 and entry[1] == 'Absent' and len(entry) > 2:  
             absent_emails.append(entry[2])
     return absent_emails
 
 
 
 def send_absent_emails(email_absentees):
-    """Sends emails to students in the provided list, notifying them of their absence."""
-    # Email credentials
-    sender_email = "phoenixbanu@gmail.com"  # Replace with your email
-    sender_password = "jdoe mtgn ofbg tfmh"  # Replace with your password
+   
+    sender_email = "phoenixbanu@gmail.com" 
+    sender_password = "jdoe mtgn ofbg tfmh"  
 
-    # Email content
+   
     subject = "Absentee Notice"
     body = """
 Dear Student,
@@ -244,16 +243,15 @@ Praveen Sir,'
 AIML A Co-ordinator
 """
 
-    # Set up SMTP server
+    
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(sender_email, sender_password)
     except Exception as e:
         print(f"Failed to connect to SMTP server: {e}")
-        return  # Stop if connection fails
-
-    # Send email to each absentee
+        return  
+    
     for recipient in email_absentees:
         msg = EmailMessage()
         msg['From'] = sender_email
@@ -270,8 +268,6 @@ AIML A Co-ordinator
     server.quit()
 
 
-
-# main function
 if __name__ == '__main__':
     update_absent_status()
     absent_emails = get_absent_emails()
